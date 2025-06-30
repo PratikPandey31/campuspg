@@ -1,0 +1,7 @@
+node_modules/
+.env
+ngrok/
+
+# Optional: Logs, temporary files etc.
+npm-debug.log
+*.log
