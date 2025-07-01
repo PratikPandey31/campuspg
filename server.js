@@ -30,29 +30,14 @@ app.use(cors({
 
 // Joi Schema for validating incoming payment requests
 const paymentSchema = Joi.object({
-    amount: Joi.number().positive().precision(2).required().messages({
-        'number.base': 'Amount must be a number.',
-        'number.positive': 'Amount must be positive.',
-        'number.precision': 'Amount must have at most 2 decimal places.',
-        'any.required': 'Amount is required.'
-    }),
-    currency: Joi.string().length(3).uppercase().required().messages({
-        'string.base': 'Currency must be a string.',
-        'string.length': 'Currency must be 3 characters long (e.g., INR, USD).',
-        'string.uppercase': 'Currency must be uppercase.',
-        'any.required': 'Currency is required.'
-    }),
     customerEmail: Joi.string().email().required().messages({
         'string.base': 'Customer email must be a string.',
         'string.email': 'Customer email must be a valid email address.',
         'any.required': 'Customer email is required.'
     }),
-    userId: Joi.string().optional().messages({
-        'string.base': 'User ID must be a string.'
-    }),
-    returnUrl: Joi.string().uri().messages({
-        'string.base': 'Return URL must be a string.',
-        'string.uri': 'Return URL must be a valid URI.'
+    userId: Joi.string().required().messages({
+        'string.base': 'User ID must be a string.',
+        'any.required': 'User ID is required.'
     })
 });
 
@@ -70,12 +55,14 @@ app.post('/create-payment-intent', async (req, res) => {
     }
 
     const {
-        amount,
-        currency,
         customerEmail,
-        userId, // Extracted new optional field
-        returnUrl // Extracted new optional field
+        userId
     } = value; // 'value' contains the validated and cleaned data
+
+    // Set default values
+    const returnUrl = 'http://localhost:5173/studentProfile';
+    const currency = 'INR';
+    const amount = 1; // You may want to adjust this default amount or make it configurable
 
     // This allows us to retrieve them when the webhook returns.
     let merchantRef = `payomatix-ref-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -110,7 +97,7 @@ app.post('/create-payment-intent', async (req, res) => {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Authorization': PAYOMATIX_SECRET_KEY, // Use your Payomatix Secret Key for this API call
+                'Authorization': PAYOMATIX_SECRET_KEY, 
                 'Content-Type': 'application/json'
             },
             body: payomatixRequestBody
@@ -209,7 +196,7 @@ app.post('/payomatix-webhook', async (req, res) => {
     // Regex to find 'user_...' and 'card_...' patterns
     const userIdMatch = correlationId.match(/-user_([a-zA-Z0-9]+)/); // Adjust regex based on actual ID format
 
-    if (userIdMatch && userIdMatch[1]) {
+    if (userIdMatch?.[1]) {
         userId = userIdMatch[1];
         console.log(`Extracted userId: ${userId}`);
     }
