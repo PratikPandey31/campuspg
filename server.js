@@ -67,7 +67,7 @@ app.post('/create-payment-intent', async (req, res) => {
     // This allows us to retrieve them when the webhook returns.
     let merchantRef = `payomatix-ref-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     if (userId) {
-        merchantRef += `-user_${userId}`;
+        merchantRef = userId;
     }
 
     // Payomatix return and notify URLs (these need to be public and reachable by Payomatix)
@@ -164,13 +164,7 @@ app.post('/payomatix-webhook', async (req, res) => {
     console.log('------------------------');
 
     // --- IMPORTANT: Webhook Verification (CRITICAL for security) ---
-    // Implement this! For production, you MUST verify that this webhook came from Payomatix
-    // using their provided signature verification mechanism.
-    // Example (conceptual):
-    // --- END Webhook Verification ---
 
-
-    // Extract relevant data from the nested 'data' object of the Payomatix webhook
     const webhookData = req.body.data;
 
     if (!webhookData) {
@@ -213,7 +207,7 @@ app.post('/payomatix-webhook', async (req, res) => {
     // --- Forwarding the webhook message to Campus Backend ---
     if (Campus_BACKEND_URL && Campus_INTERNAL_SECRET) {
         try {
-            const CampusBackendNotificationUrl = `${Campus_BACKEND_URL}/api/health-cards/internal/payment-update`;
+            const CampusBackendNotificationUrl = `${Campus_BACKEND_URL}/api/payment-update`;
             console.log(`Received Payomatix webhook, forwarding to Campus Backend at: ${CampusBackendNotificationUrl}`);
 
             const forwardPayload = {
@@ -258,6 +252,9 @@ app.post('/payomatix-webhook', async (req, res) => {
     // Always send 200 OK back to Payomatix to acknowledge receipt promptly
     res.status(200).json({ received: true, message: 'Webhook received and processed.' });
 });
+
+
+const PORT = process.env.PORT || 5000;
 
 app.listen(port, () => {
     console.log(`Payomatix backend server listening at http://localhost:${port}`);
