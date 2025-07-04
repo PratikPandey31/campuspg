@@ -185,15 +185,7 @@ app.post('/payomatix-webhook', async (req, res) => {
         phone_no: customerPhone
     } = webhookData;
 
-    let userId = null;
 
-    // Regex to find 'user_...' and 'card_...' patterns
-    const userIdMatch = correlationId.match(/-user_([a-zA-Z0-9]+)/); // Adjust regex based on actual ID format
-
-    if (userIdMatch?.[1]) {
-        userId = userIdMatch[1];
-        console.log(`Extracted userId: ${userId}`);
-    }
     // --- END NEW Extraction ---
 
     // Basic validation for critical fields before forwarding
@@ -220,8 +212,7 @@ app.post('/payomatix-webhook', async (req, res) => {
                 customerEmail: customerEmail,
                 customerName: customerName,
                 customerPhone: customerPhone,
-                receivedAt: new Date().toISOString(),
-                userId: userId, // Will be null if not found in correlationId
+                receivedAt: new Date().toISOString()
             };
 
             console.log('Forwarding Payload:', JSON.stringify(forwardPayload, null, 2));
