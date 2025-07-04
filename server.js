@@ -15,6 +15,20 @@ const Campus_INTERNAL_SECRET = process.env.Campus_INTERNAL_SECRET;
 
 const PAYOMATIX_API_URL = 'https://admin.payomatix.com/payment/merchant/transaction';
 
+// Validate required environment variables
+if (!PAYOMATIX_SECRET_KEY) {
+    console.error('ERROR: PAYOMATIX_SECRET_KEY is not set in environment variables.');
+    process.exit(1);
+}
+
+if (!Campus_BACKEND_URL) {
+    console.warn('WARNING: Campus_BACKEND_URL is not set. Webhook forwarding will be disabled.');
+}
+
+if (!Campus_INTERNAL_SECRET) {
+    console.warn('WARNING: Campus_INTERNAL_SECRET is not set. Webhook forwarding will be disabled.');
+}
+
 // Security Middleware
 app.use(helmet());
 
@@ -102,6 +116,25 @@ app.post('/create-payment-intent', async (req, res) => {
             },
             body: payomatixRequestBody
         });
+
+        console.log('Payomatix Response Status:', payomatixResponse.status);
+        console.log('Payomatix Response Headers:', Object.fromEntries(payomatixResponse.headers.entries()));
+
+        // Check if response is JSON
+        const contentType = payomatixResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const textResponse = await payomatixResponse.text();
+            console.error('Payomatix API returned non-JSON response:');
+            console.error('Content-Type:', contentType);
+            console.error('Response Body:', textResponse);
+            
+            return res.status(500).json({
+                success: false,
+                message: 'Payomatix API returned an invalid response format.',
+                error: 'Expected JSON response but received: ' + contentType,
+                payomatixStatus: payomatixResponse.status
+            });
+        }
 
         const payomatixData = await payomatixResponse.json();
 
