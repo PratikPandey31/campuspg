@@ -74,7 +74,7 @@ app.post('/create-payment-intent', async (req, res) => {
     } = value; // 'value' contains the validated and cleaned data
 
     // Set default values
-    const returnUrl = 'http://localhost:5173/studentProfile';
+    const returnUrl = 'http://43.205.232.182:5000/api/studentProfile';
     const currency = 'INR';
     const amount = 1; // You may want to adjust this default amount or make it configurable
 
@@ -281,7 +281,7 @@ app.post('/payomatix-webhook', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(port, () => {
-    console.log(`Payomatix backend server listening at http://localhost:${port}`);
+    console.log(`Payomatix backend server listening at Port:${port}`);
     console.log('----------------------------------------------------');
     console.log('IMPORTANT NOTES:');
     console.log(`2. Your Secret Key: ${PAYOMATIX_SECRET_KEY ? '****** (loaded)' : 'NOT LOADED! Check .env'}`);
