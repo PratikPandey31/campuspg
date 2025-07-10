@@ -76,7 +76,7 @@ app.post('/create-payment-intent', async (req, res) => {
     // Set default values
     const returnUrl = 'http://43.205.232.182:5000/api/studentProfile';
     const currency = 'INR';
-    const amount = 1; // You may want to adjust this default amount or make it configurable
+    const amount = 85; // You may want to adjust this default amount or make it configurable
 
     // This allows us to retrieve them when the webhook returns.
     let merchantRef = `payomatix-ref-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
